@@ -1,0 +1,38 @@
+{
+  "name": "captjm/story-entity-bundle",
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "description": "",
+  "version": "v1.0.0",
+  "keywords": [
+    "backend",
+    "admin"
+  ],
+  "autoload": {
+    "psr-4": {
+      "CaptJM\\Bundle\\StoryEntityBundle\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "David Makaridze",
+      "email": "dmakaridze@gmail.com",
+      "homepage": "https://github.com/captjm"
+    }
+  ],
+  "require": {
+    "php": ">=8.0.2",
+    "doctrine/annotations": "^1.0",
+    "doctrine/orm": "^2.13",
+    "easycorp/easyadmin-bundle": "^4.3",
+    "helios-ag/fm-elfinder-bundle": "^12.1",
+    "friendsofsymfony/ckeditor-bundle": "^2.4"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "symfony/flex": true,
+      "symfony/runtime": true
+    }
+  }
+}
