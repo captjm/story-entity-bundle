@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace CaptJM\Bundle\StoryEntityBundle\Controller\Admin;
 
-use App\Entity\Story;
+use CaptJM\Bundle\StoryEntityBundle\Entity\Story;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;

@@ -26,7 +26,8 @@
     "doctrine/orm": "^2.13",
     "easycorp/easyadmin-bundle": "^4.3",
     "helios-ag/fm-elfinder-bundle": "^12.1",
-    "friendsofsymfony/ckeditor-bundle": "^2.4"
+    "friendsofsymfony/ckeditor-bundle": "^2.4",
+    "captjm/elfinderwidget-bundle": "^1.0"
   },
   "config": {
     "sort-packages": true,
