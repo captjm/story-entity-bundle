@@ -92,7 +92,7 @@ class StoryCrudController extends AbstractCrudController
 
     public function insertFieldAt(FieldInterface $field, int $pos, string $pageName): self
     {
-        $this->fields [] = compact($field, $pos, $pageName);
+        $this->fields [] = compact(['field', 'pos', 'pageName']);
         return $this;
     }
 }
