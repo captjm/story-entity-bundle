@@ -32,28 +32,37 @@ class StoryCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id')->hideOnForm(),
-            TextField::new('headline'),
+            IdField::new('id')
+                ->hideOnForm()
+                ->setCustomOption('weight', 10),
+            TextField::new('headline')
+                ->setCustomOption('weight', 20),
             TextField::new('cover')
                 ->setFormType(ElFinderType::class)
                 ->setFormTypeOptions([
                     'instance' => 'form',
                     'enable' => true,
                 ])
-                ->onlyOnForms(),
+                ->onlyOnForms()
+                ->setCustomOption('weight', 30),
             TextField::new('cover', 'Cover Image')
                 ->setTemplateName('crud/field/image')
-                ->hideOnForm(),
+                ->hideOnForm()
+                ->setCustomOption('weight', 40),
             TextareaField::new('extract')
                 ->setFormType(CKEditorType::class)
                 ->setFormTypeOption('config_name', 'extract_config')
-                ->onlyOnForms(),
+                ->onlyOnForms()
+                ->setCustomOption('weight', 50),
             TextareaField::new('content')
                 ->setFormType(CKEditorType::class)
                 ->setFormTypeOption('config_name', 'content_config')
-                ->onlyOnForms(),
-            BooleanField::new('published'),
-            DateTimeField::new('publishDate'),
+                ->onlyOnForms()
+                ->setCustomOption('weight', 60),
+            BooleanField::new('published')
+                ->setCustomOption('weight', 70),
+            DateTimeField::new('publishDate')
+                ->setCustomOption('weight', 80),
         ];
     }
 
