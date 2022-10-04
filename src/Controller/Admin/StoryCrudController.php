@@ -74,7 +74,8 @@ class StoryCrudController extends AbstractCrudController
                 ->setFormTypeOption('config_name', 'content_config')
                 ->onlyOnForms(),
             BooleanField::new('published'),
-            DateTimeField::new('publishDate'),
+            DateTimeField::new('publishDate')
+                ->renderAsChoice(),
         ];
         foreach ($additionalFields as $pos => $field) {
             array_splice($fields, $pos, 0, [$field]);
