@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use FM\ElfinderBundle\Form\Type\ElFinderType;
@@ -62,6 +63,8 @@ class StoryCrudController extends AbstractCrudController
                     'enable' => true,
                 ])
                 ->onlyOnForms(),
+            SlugField::new('slug')
+                ->setTargetFieldName('headline'),
             TextField::new('cover', 'Cover Image')
                 ->setTemplateName('crud/field/image')
                 ->hideOnForm(),

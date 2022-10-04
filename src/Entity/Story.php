@@ -15,6 +15,8 @@ class Story
     #[ORM\Column(length: 255)]
     protected ?string $headline = null;
     #[ORM\Column(length: 255)]
+    protected ?string $slug = null;
+    #[ORM\Column(length: 255)]
     protected ?string $cover = null;
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     protected ?string $extract = null;
@@ -24,6 +26,16 @@ class Story
     protected ?bool $published = null;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected ?\DateTimeInterface $publishDate = null;
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): void
+    {
+        $this->slug = $slug;
+    }
 
     public function getCover(): ?string
     {
