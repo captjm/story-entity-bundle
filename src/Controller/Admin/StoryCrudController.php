@@ -5,6 +5,7 @@ namespace CaptJM\Bundle\StoryEntityBundle\Controller\Admin;
 use CaptJM\Bundle\StoryEntityBundle\Entity\Story;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
@@ -16,6 +17,8 @@ use FOS\CKEditorBundle\Form\Type\CKEditorType;
 
 class StoryCrudController extends AbstractCrudController
 {
+    private array $fields = [];
+
     public static function getEntityFqcn(): string
     {
         return Story::class;
@@ -31,7 +34,7 @@ class StoryCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        return [
+        $fields = [
             IdField::new('id')
                 ->hideOnForm()
                 ->setCustomOption('weight', 10),
@@ -64,6 +67,12 @@ class StoryCrudController extends AbstractCrudController
             DateTimeField::new('publishDate')
                 ->setCustomOption('weight', 80),
         ];
+        foreach ($this->fields as $f) {
+            if ($f['pageName'] === $pageName) {
+                array_splice($fields, $f['pos'], 0, [$f['field']]);
+            }
+        }
+        return $fields;
     }
 
     public function configureCrud(Crud $crud): Crud
@@ -77,8 +86,13 @@ class StoryCrudController extends AbstractCrudController
     {
         $assets
             ->addJsFile('/bundles/fosckeditor/ckeditor.js')
-            ->addJsFile('/bundles/elfinderwidget/ELFinderWidget.js')
-        ;
+            ->addJsFile('/bundles/elfinderwidget/ELFinderWidget.js');
         return $assets;
+    }
+
+    public function insertFieldAt(FieldInterface $field, int $pos, string $pageName): self
+    {
+        $this->fields [] = compact($field, $pos, $pageName);
+        return $this;
     }
 }
