@@ -17,8 +17,6 @@ use FOS\CKEditorBundle\Form\Type\CKEditorType;
 
 class StoryCrudController extends AbstractCrudController
 {
-    private array $fields = [];
-
     public static function getEntityFqcn(): string
     {
         return Story::class;
@@ -34,45 +32,8 @@ class StoryCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $fields = [
-            IdField::new('id')
-                ->hideOnForm()
-                ->setCustomOption('weight', 10),
-            TextField::new('headline')
-                ->setCustomOption('weight', 20),
-            TextField::new('cover')
-                ->setFormType(ElFinderType::class)
-                ->setFormTypeOptions([
-                    'instance' => 'form',
-                    'enable' => true,
-                ])
-                ->onlyOnForms()
-                ->setCustomOption('weight', 30),
-            TextField::new('cover', 'Cover Image')
-                ->setTemplateName('crud/field/image')
-                ->hideOnForm()
-                ->setCustomOption('weight', 40),
-            TextareaField::new('extract')
-                ->setFormType(CKEditorType::class)
-                ->setFormTypeOption('config_name', 'extract_config')
-                ->onlyOnForms()
-                ->setCustomOption('weight', 50),
-            TextareaField::new('content')
-                ->setFormType(CKEditorType::class)
-                ->setFormTypeOption('config_name', 'content_config')
-                ->onlyOnForms()
-                ->setCustomOption('weight', 60),
-            BooleanField::new('published')
-                ->setCustomOption('weight', 70),
-            DateTimeField::new('publishDate')
-                ->setCustomOption('weight', 80),
-        ];
-        foreach ($this->fields as $f) {
-            if ($f['pageName'] === $pageName) {
-                array_splice($fields, $f['pos'], 0, [$f['field']]);
-            }
-        }
-        return $fields;
+        dump($this);
+        return $this->getFields($pageName);
     }
 
     public function configureCrud(Crud $crud): Crud
@@ -90,9 +51,36 @@ class StoryCrudController extends AbstractCrudController
         return $assets;
     }
 
-    public function insertFieldAt(FieldInterface $field, int $pos, string $pageName): self
+    public function getFields(string $pageName, array $additionalFields = []): array
     {
-        $this->fields [] = compact(['field', 'pos', 'pageName']);
-        return $this;
+        $fields = [
+            IdField::new('id')
+                ->hideOnForm(),
+            TextField::new('headline'),
+            TextField::new('cover')
+                ->setFormType(ElFinderType::class)
+                ->setFormTypeOptions([
+                    'instance' => 'form',
+                    'enable' => true,
+                ])
+                ->onlyOnForms(),
+            TextField::new('cover', 'Cover Image')
+                ->setTemplateName('crud/field/image')
+                ->hideOnForm(),
+            TextareaField::new('extract')
+                ->setFormType(CKEditorType::class)
+                ->setFormTypeOption('config_name', 'extract_config')
+                ->onlyOnForms(),
+            TextareaField::new('content')
+                ->setFormType(CKEditorType::class)
+                ->setFormTypeOption('config_name', 'content_config')
+                ->onlyOnForms(),
+            BooleanField::new('published'),
+            DateTimeField::new('publishDate'),
+        ];
+        foreach ($additionalFields as $pos => $field) {
+            array_splice($fields, $pos, 0, [$field]);
+        }
+        return $fields;
     }
 }
