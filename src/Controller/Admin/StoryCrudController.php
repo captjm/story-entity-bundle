@@ -32,7 +32,6 @@ class StoryCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        dump($this);
         return $this->getFields($pageName);
     }
 
