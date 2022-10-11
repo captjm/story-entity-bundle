@@ -4,8 +4,14 @@ namespace CaptJM\Bundle\StoryEntityBundle\Controller\Admin;
 
 use CaptJM\Bundle\StoryEntityBundle\Entity\Story;
 use CaptJM\Bundle\StoryEntityBundle\Tools\ChoiceGenerator;
+use DateTime;
+use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
@@ -16,9 +22,17 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use FM\ElfinderBundle\Form\Type\ElFinderType;
 use FOS\CKEditorBundle\Form\Type\CKEditorType;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class StoryCrudController extends AbstractCrudController
 {
+    private ObjectManager $em;
+
+    public function __construct(ManagerRegistry $doctrine)
+    {
+        $this->em = $doctrine->getManager();
+    }
+
     public static function getEntityFqcn(): string
     {
         return Story::class;
@@ -27,7 +41,7 @@ class StoryCrudController extends AbstractCrudController
     public function createEntity(string $entityFqcn)
     {
         $entity = new $entityFqcn();
-        $entity->setPublishDate(new \DateTime());
+        $entity->setPublishDate(new DateTime());
         $entity->setLocale($this->getParameter('app.default_locale'));
 
         return $entity;
@@ -41,6 +55,7 @@ class StoryCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
+            ->showEntityActionsInlined()
             ->addFormTheme('@ELFinderWidget/form/elfinder_widget.html.twig')
             ->addFormTheme('@FOSCKEditor/Form/ckeditor_widget.html.twig');
     }
@@ -89,5 +104,49 @@ class StoryCrudController extends AbstractCrudController
             array_splice($fields, $pos, 0, [$field]);
         }
         return $fields;
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $translate = Action::new('translate', '', 'fa fa-language')
+            ->setHtmlAttributes(['title' => 'Translate'])
+            ->displayIf(function () {
+                return $this->translatable();
+            })
+            ->linkToCrudAction('translate');
+        return $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->add(Crud::PAGE_EDIT, $translate)
+            // ->add(Crud::PAGE_EDIT, Action::SAVE_AND_ADD_ANOTHER)
+            ;
+    }
+
+    public function translate(AdminContext $context): RedirectResponse
+    {
+        /** @var Story $item */
+        $item = $context->getEntity()->getInstance();
+        $locales = explode('|', $this->getParameter('app.supported_locales'));
+        if (count($locales) > 1) {
+            $newL = null;
+            foreach ($locales as $l) {
+                if ($l !== $item->getLocale()) $newL = $l;
+            }
+            if ($newL) {
+                $newItem = clone $item;
+                $newItem->setLocale($newL)->setPublished(false);
+                $this->em->persist($newItem);
+                $this->em->flush();
+            }
+        }
+        return $this->redirect($context->getReferrer());
+    }
+
+    private function translatable() :bool
+    {
+        /** @var Story $item */
+        $item = $this->getContext()->getEntity()->getInstance();
+        $translation = $item->getTranslation();
+        dump($translation);
+        return !$translation;
     }
 }

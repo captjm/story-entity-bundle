@@ -2,6 +2,7 @@
 
 namespace CaptJM\Bundle\StoryEntityBundle\Entity;
 
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -27,7 +28,20 @@ class Story
     #[ORM\Column]
     protected ?bool $published = null;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    protected ?\DateTimeInterface $publishDate = null;
+    protected ?DateTimeInterface $publishDate = null;
+
+    protected TranslationInterface $translation;
+
+    public function getTranslation(): TranslationInterface
+    {
+        return $this->translation;
+    }
+
+    public function setTranslation(TranslationInterface $translation): self
+    {
+        $this->translation = $translation;
+        return $this;
+    }
 
     public function getLocale(): ?string
     {
@@ -117,12 +131,12 @@ class Story
         return $this;
     }
 
-    public function getPublishDate(): ?\DateTimeInterface
+    public function getPublishDate(): ?DateTimeInterface
     {
         return $this->publishDate;
     }
 
-    public function setPublishDate(\DateTimeInterface $publishDate): self
+    public function setPublishDate(DateTimeInterface $publishDate): self
     {
         $this->publishDate = $publishDate;
 
