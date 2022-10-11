@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\MappedSuperclass]
-class Story implements StoryInterface
+class Story
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,8 +28,6 @@ class Story implements StoryInterface
     protected ?bool $published = null;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected ?\DateTimeInterface $publishDate = null;
-    #[ORM\ManyToOne(inversedBy: 'stories')]
-    private ?Translation $translation = null;
 
     public function getLocale(): ?string
     {
@@ -127,18 +125,6 @@ class Story implements StoryInterface
     public function setPublishDate(\DateTimeInterface $publishDate): self
     {
         $this->publishDate = $publishDate;
-
-        return $this;
-    }
-
-    public function getTranslation(): ?Translation
-    {
-        return $this->translation;
-    }
-
-    public function setTranslation(?Translation $translation): self
-    {
-        $this->translation = $translation;
 
         return $this;
     }
