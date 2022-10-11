@@ -3,10 +3,12 @@
 namespace CaptJM\Bundle\StoryEntityBundle\Controller\Admin;
 
 use CaptJM\Bundle\StoryEntityBundle\Entity\Story;
+use CaptJM\Bundle\StoryEntityBundle\Tools\ChoiceGenerator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
@@ -26,6 +28,7 @@ class StoryCrudController extends AbstractCrudController
     {
         $entity = new $entityFqcn();
         $entity->setPublishDate(new \DateTime());
+        $entity->setLocale($this->getParameter('app.default_locale'));
 
         return $entity;
     }
@@ -55,6 +58,8 @@ class StoryCrudController extends AbstractCrudController
         $fields = [
             IdField::new('id')
                 ->hideOnForm(),
+            ChoiceField::new('locale')
+                ->setChoices(ChoiceGenerator::generate($this->getParameter('app.supported_locales'))),
             TextField::new('headline'),
             TextField::new('cover')
                 ->setFormType(ElFinderType::class)
