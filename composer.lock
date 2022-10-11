@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "64f71790401f65910d7eda445562e758",
+    "content-hash": "a3f9c8b50d5ffb6a3e62f71937518ae8",
     "packages": [
         {
             "name": "captjm/elfinderwidget-bundle",
