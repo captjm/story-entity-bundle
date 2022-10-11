@@ -6,12 +6,14 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\MappedSuperclass]
-class Story
+class Story implements StoryInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     protected ?int $id = null;
+    #[ORM\Column(length: 2)]
+    protected ?string $locale = null;
     #[ORM\Column(length: 255)]
     protected ?string $headline = null;
     #[ORM\Column(length: 255)]
@@ -26,15 +28,30 @@ class Story
     protected ?bool $published = null;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected ?\DateTimeInterface $publishDate = null;
+    #[ORM\ManyToOne(inversedBy: 'stories')]
+    private ?Translation $translation = null;
+
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+
+    public function setLocale(?string $locale): self
+    {
+        $this->locale = $locale;
+        return $this;
+    }
 
     public function getSlug(): ?string
     {
         return $this->slug;
     }
 
-    public function setSlug(?string $slug): void
+    public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
+        return $this;
     }
 
     public function getCover(): ?string
@@ -110,6 +127,18 @@ class Story
     public function setPublishDate(\DateTimeInterface $publishDate): self
     {
         $this->publishDate = $publishDate;
+
+        return $this;
+    }
+
+    public function getTranslation(): ?Translation
+    {
+        return $this->translation;
+    }
+
+    public function setTranslation(?Translation $translation): self
+    {
+        $this->translation = $translation;
 
         return $this;
     }
