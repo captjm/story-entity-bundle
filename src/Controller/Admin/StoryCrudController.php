@@ -3,6 +3,7 @@
 namespace CaptJM\Bundle\StoryEntityBundle\Controller\Admin;
 
 use CaptJM\Bundle\StoryEntityBundle\Entity\Story;
+use CaptJM\Bundle\StoryEntityBundle\Entity\Translation;
 use CaptJM\Bundle\StoryEntityBundle\Tools\ChoiceGenerator;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
@@ -20,17 +21,21 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use FM\ElfinderBundle\Form\Type\ElFinderType;
 use FOS\CKEditorBundle\Form\Type\CKEditorType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class StoryCrudController extends AbstractCrudController
 {
     private ObjectManager $em;
+    private AdminUrlGenerator $adminUrlGenerator;
 
-    public function __construct(ManagerRegistry $doctrine)
+    public function __construct(ManagerRegistry $doctrine, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->em = $doctrine->getManager();
+        $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
     public static function getEntityFqcn(): string
@@ -72,7 +77,7 @@ class StoryCrudController extends AbstractCrudController
     {
         $fields = [
             IdField::new('id')
-                ->hideOnForm(),
+                ->setDisabled(true),
             ChoiceField::new('locale')
                 ->setChoices(ChoiceGenerator::generate($this->getParameter('app.supported_locales'))),
             TextField::new('headline'),
@@ -108,62 +113,70 @@ class StoryCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $translate = Action::new('translate', '', 'fa fa-language')
-            ->setHtmlAttributes(['title' => 'Translate'])
-            ->displayIf(function () {
-                return $this->translatable();
-            })
-            ->linkToCrudAction('translate');
-        return $actions
-            ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->add(Crud::PAGE_EDIT, $translate)
-            // ->add(Crud::PAGE_EDIT, Action::SAVE_AND_ADD_ANOTHER)
-            ;
-    }
-
-    public function translate(): RedirectResponse
-    {
-        $context = $this->getContext();
-        /** @var Story $item */
-        $item = $context->getEntity()->getInstance();
+        $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL);
         $locales = explode('|', $this->getParameter('app.supported_locales'));
         if (count($locales) > 1) {
-            $newL = null;
-            foreach ($locales as $l) {
-                if ($l !== $item->getLocale()) $newL = $l;
-            }
-            if ($newL) {
-                $newItem = clone $item;
-                $newItem->setLocale($newL)->setPublished(false);
-                $this->em->persist($newItem);
-                $this->em->flush();
+            $em = $this->em;
+            foreach ($locales as $locale) {
+                $url = $this->adminUrlGenerator
+                    ->setController(get_class($this))
+                    ->setAction('translate')
+                    ->setEntityId(Request::createFromGlobals()->get('entityId'))
+                    ->set('targetLocale', $locale)
+                    ->generateUrl();
+                $actions->add(Crud::PAGE_EDIT,
+                    Action::new('transTo' . $locale, strtoupper($locale), 'fa')
+                        ->setHtmlAttributes(['title' => 'Translate to ' . strtoupper($locale)])
+                        ->displayIf(static function (Story $story) use ($locale, $em) {
+                            $display = $story->getLocale() !== $locale;
+                            if ($display) {
+                                $translation = $story->getTranslation();
+                                if ($translation) {
+                                    $items = $em
+                                        ->getRepository(get_class($story))
+                                        ->findBy([
+                                            'translation' => $translation
+                                        ]);
+                                    foreach ($items as $item) {
+                                        if ($item->getLocale() === $locale) return false;
+                                    }
+                                }
+                            }
+                            return $display;
+                        })
+                        ->linkToUrl($url)
+                );
             }
         }
-        return $this->redirect($context->getReferrer());
+        return $actions;
     }
 
-    private function translatable() :bool
+    public function translate(AdminContext $adminContext): RedirectResponse
     {
-        $context = $this->getContext();
-        $locales = explode('|', $this->getParameter('app.supported_locales'));
-        if (count($locales) > 1) {
-            /** @var Story $item */
-            $item = $context->getEntity()->getInstance();
-            $translation = $item->getTranslation();
-            if (!$translation) {
-                //$translation= new Tra
-            }
-            $newL = null;
-            foreach ($locales as $l) {
-                if ($l !== $item->getLocale()) $newL = $l;
-            }
-            if ($newL) {
-                $newItem = clone $item;
-                $newItem->setLocale($newL)->setPublished(false);
-                $this->em->persist($newItem);
-                $this->em->flush();
-            }
+        /** @var Story $entity */
+        $entity = $adminContext->getEntity()->getInstance();
+        $translation = $entity->getTranslation();
+        if ($translation === null) {
+            $translation = new Translation();
+            $this->em->persist($translation);
+            $entity->setTranslation($translation);
+            $this->em->persist($entity);
         }
-        return true;
+        $newEntity = clone $entity;
+        $newEntity
+            ->setId(null)
+            ->setLocale($adminContext->getRequest()->get('targetLocale'))
+            ->setTranslation($translation);
+        $this->em->persist($newEntity);
+        $this->em->flush();
+        return $this->redirect(
+            $this
+                ->adminUrlGenerator
+                ->setController(get_class($this))
+                ->setAction(Action::EDIT)
+                ->setEntityId($newEntity->getId())
+                ->generateUrl()
+        );
     }
 }

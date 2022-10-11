@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Translation;
+use CaptJM\Bundle\StoryEntityBundle\Entity\Translation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

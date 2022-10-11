@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace CaptJM\Bundle\StoryEntityBundle\Entity;
 
 use App\Repository\TranslationRepository;
-use CaptJM\Bundle\StoryEntityBundle\Entity\TranslationInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TranslationRepository::class)]
@@ -13,11 +12,6 @@ class Translation implements TranslationInterface
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    public function __construct()
-    {
-
-    }
 
     public function getId(): ?int
     {

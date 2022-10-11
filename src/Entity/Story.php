@@ -2,7 +2,6 @@
 
 namespace CaptJM\Bundle\StoryEntityBundle\Entity;
 
-use App\Entity\Translation;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -30,25 +29,47 @@ class Story
     protected ?bool $published = null;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected ?DateTimeInterface $publishDate = null;
-    #[ORM\ManyToOne(Translation::class)]
+    #[ORM\ManyToOne(Translation::class, cascade: ['persist'])]
     protected Translation $translation;
 
-    public function getTranslation(): Translation
+    protected string $repositoryClass;
+
+    /**
+     * @return string
+     */
+    public function getRepositoryClass(): string
     {
-        return $this->translation;
+        return $this->repositoryClass;
     }
 
-    public function setTranslation(Translation $translation): self
+    /**
+     * @param string $repositoryClass
+     */
+    public function setRepositoryClass(string $repositoryClass): void
+    {
+        $this->repositoryClass = $repositoryClass;
+    }
+
+    public function getTranslation(): ?Translation
+    {
+        return $this->translation ?? null;
+    }
+
+    public function setTranslation(?Translation $translation): self
     {
         $this->translation = $translation;
         return $this;
+    }
+
+    public function translated(): bool
+    {
+        return isset($this->translation);
     }
 
     public function getLocale(): ?string
     {
         return $this->locale;
     }
-
 
     public function setLocale(?string $locale): self
     {
@@ -82,6 +103,12 @@ class Story
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(?int $id): self
+    {
+        $this->id = $id;
+        return $this;
     }
 
     public function getHeadline(): ?string
