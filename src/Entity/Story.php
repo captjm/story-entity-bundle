@@ -2,6 +2,7 @@
 
 namespace CaptJM\Bundle\StoryEntityBundle\Entity;
 
+use App\Entity\Translation;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,15 +30,15 @@ class Story
     protected ?bool $published = null;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     protected ?DateTimeInterface $publishDate = null;
+    #[ORM\ManyToOne(Translation::class)]
+    protected Translation $translation;
 
-    protected TranslationInterface $translation;
-
-    public function getTranslation(): TranslationInterface
+    public function getTranslation(): Translation
     {
         return $this->translation;
     }
 
-    public function setTranslation(TranslationInterface $translation): self
+    public function setTranslation(Translation $translation): self
     {
         $this->translation = $translation;
         return $this;

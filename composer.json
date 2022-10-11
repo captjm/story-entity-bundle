@@ -3,7 +3,7 @@
   "type": "symfony-bundle",
   "license": "MIT",
   "description": "",
-  "version": "v1.0.12",
+  "version": "v1.0.13",
   "keywords": [
     "backend",
     "admin"

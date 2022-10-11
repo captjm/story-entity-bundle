@@ -121,8 +121,9 @@ class StoryCrudController extends AbstractCrudController
             ;
     }
 
-    public function translate(AdminContext $context): RedirectResponse
+    public function translate(): RedirectResponse
     {
+        $context = $this->getContext();
         /** @var Story $item */
         $item = $context->getEntity()->getInstance();
         $locales = explode('|', $this->getParameter('app.supported_locales'));
@@ -143,10 +144,26 @@ class StoryCrudController extends AbstractCrudController
 
     private function translatable() :bool
     {
-        /** @var Story $item */
-        $item = $this->getContext()->getEntity()->getInstance();
-        $translation = $item->getTranslation();
-        dump($translation);
-        return !$translation;
+        $context = $this->getContext();
+        $locales = explode('|', $this->getParameter('app.supported_locales'));
+        if (count($locales) > 1) {
+            /** @var Story $item */
+            $item = $context->getEntity()->getInstance();
+            $translation = $item->getTranslation();
+            if (!$translation) {
+                //$translation= new Tra
+            }
+            $newL = null;
+            foreach ($locales as $l) {
+                if ($l !== $item->getLocale()) $newL = $l;
+            }
+            if ($newL) {
+                $newItem = clone $item;
+                $newItem->setLocale($newL)->setPublished(false);
+                $this->em->persist($newItem);
+                $this->em->flush();
+            }
+        }
+        return true;
     }
 }
